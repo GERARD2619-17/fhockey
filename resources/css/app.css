@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+.content-wrapper {
+    padding-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.section-border {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.profile-update-form {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.profile-update-password-form {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.profile-two-factor-authentication-form {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.profile-logout-other-browser-sessions-form {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
+
+.profile-delete-user-form {
+    margin-top: 20px; /* Ajusta el valor según tus necesidades */
+}
