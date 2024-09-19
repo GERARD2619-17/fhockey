@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Equipos;
 use App\Models\Partidos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PartidosController extends Controller
@@ -32,7 +34,50 @@ class PartidosController extends Controller
      */
     public function store(Request $request)
     {
-       
+        DB::beginTransaction();
+
+        try {
+            // Validar la solicitud
+            $validated = $request->validate([
+                'equipo_local' => 'required|exists:equipos,id',
+                'equipo_visitante' => 'required|exists:equipos,id|different:equipo_local',
+                'fecha_juego' => 'required|date',
+                'hora_juego' => 'required',
+            ]);
+    
+            // Crear un nuevo partido
+            $partido = new Partidos;
+            $partido->equipo_local_id = $validated['equipo_local'];
+            $partido->equipo_visitante_id = $validated['equipo_visitante'];
+            $partido->fecha_juego = $validated['fecha_juego'];
+            $partido->hora_juego = $validated['hora_juego'];
+            $partido->estado = 'no_iniciado';
+            
+            // Inicializar otros campos con valores por defecto
+            $partido->goles_local = 0;
+            $partido->goles_visitante = 0;
+            $partido->tarjetas_amarillas_local = 0;
+            $partido->tarjetas_amarillas_visitante = 0;
+            $partido->tarjetas_rojas_local = 0;
+            $partido->tarjetas_rojas_visitante = 0;
+            $partido->tarjetas_verdes_local = 0;
+            $partido->tarjetas_verdes_visitante = 0;
+            $partido->penales_local = 0;
+            $partido->penales_visitante = 0;
+    
+            $partido->save();
+    
+            DB::commit();
+    
+            return redirect()->route('partidos.index')->with('success', 'Partido creado exitosamente');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollback();
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error al crear partido: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Hubo un problema al crear el partido. Por favor, intenta de nuevo.');
+        }
     }
 
     /**
@@ -59,39 +104,52 @@ class PartidosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'goles_local' => 'nullable|integer',
-            'goles_visitante' => 'nullable|integer',
-            'tiempo_transcurrido' => 'nullable|string',
-            'estado' => 'required|in:no_iniciado,primer_tiempo,segundo_tiempo,finalizado',
-            'tarjetas_amarillas_local' => 'nullable|integer',
-            'tarjetas_rojas_local' => 'nullable|integer',
-            'tarjetas_verdes_local' => 'nullable|integer',
-            'penales_local' => 'nullable|integer',
-            'tarjetas_amarillas_visitante' => 'nullable|integer',
-            'tarjetas_rojas_visitante' => 'nullable|integer',
-            'tarjetas_verdes_visitante' => 'nullable|integer',
-            'penales_visitante' => 'nullable|integer',
+         // Validar la solicitud
+         $request->validate([
+            'equipo_local_id' => 'required|exists:equipos,id',
+            'equipo_visitante_id' => 'required|exists:equipos,id',
+            'fecha_juego' => 'required|date',
+            'hora_juego' => 'required|date_format:H:i',
+            'tiempo_seleccionado' => 'required|integer|min:1',
+            'goles_local' => 'nullable|integer|min:0',
+            'goles_visitante' => 'nullable|integer|min:0',
+            'tarjetas_amarillas_local' => 'nullable|integer|min:0',
+            'tarjetas_amarillas_visitante' => 'nullable|integer|min:0',
+            'tarjetas_rojas_local' => 'nullable|integer|min:0',
+            'tarjetas_rojas_visitante' => 'nullable|integer|min:0',
+            'tarjetas_verdes_local' => 'nullable|integer|min:0',
+            'tarjetas_verdes_visitante' => 'nullable|integer|min:0',
+            'penales_local' => 'nullable|integer|min:0',
+            'penales_visitante' => 'nullable|integer|min:0',
+            'estado' => 'nullable|string',
+            'inicio' => 'nullable|date_format:H:i',
+            'descanso_inicio' => 'nullable|date_format:H:i',
         ]);
 
+        // Encontrar el partido a actualizar
         $partido = Partidos::findOrFail($id);
-
+        $partido->equipo_local_id = $request->input('equipo_local_id');
+        $partido->equipo_visitante_id = $request->input('equipo_visitante_id');
+        $partido->fecha_juego = $request->input('fecha_juego');
+        $partido->hora_juego = $request->input('hora_juego');
+        $partido->tiempo_seleccionado = $request->input('tiempo_seleccionado');
         $partido->goles_local = $request->input('goles_local', 0);
         $partido->goles_visitante = $request->input('goles_visitante', 0);
-        $partido->tiempo_transcurrido = $request->input('tiempo_transcurrido', '');
-        $partido->estado = $request->input('estado');
         $partido->tarjetas_amarillas_local = $request->input('tarjetas_amarillas_local', 0);
-        $partido->tarjetas_rojas_local = $request->input('tarjetas_rojas_local', 0);
-        $partido->tarjetas_verdes_local = $request->input('tarjetas_verdes_local', 0);
-        $partido->penales_local = $request->input('penales_local', 0);
         $partido->tarjetas_amarillas_visitante = $request->input('tarjetas_amarillas_visitante', 0);
+        $partido->tarjetas_rojas_local = $request->input('tarjetas_rojas_local', 0);
         $partido->tarjetas_rojas_visitante = $request->input('tarjetas_rojas_visitante', 0);
+        $partido->tarjetas_verdes_local = $request->input('tarjetas_verdes_local', 0);
         $partido->tarjetas_verdes_visitante = $request->input('tarjetas_verdes_visitante', 0);
+        $partido->penales_local = $request->input('penales_local', 0);
         $partido->penales_visitante = $request->input('penales_visitante', 0);
-
+        $partido->estado = $request->input('estado', 'no_iniciado');
+        $partido->inicio = $request->input('inicio');
+        $partido->descanso_inicio = $request->input('descanso_inicio');
         $partido->save();
 
-        return redirect()->back()->with('success', 'Partido actualizado correctamente');
+        return redirect()->route('partidos.index')->with('success', 'Partido actualizado exitosamente');
+    
     }
 
     /**
@@ -126,17 +184,124 @@ class PartidosController extends Controller
     /**
      * Update the goals for the specified partido.
      */
-    public function actualizarGoles(Request $request, $id)
+    /*public function actualizarTiempo($id, Request $request)
     {
         $partido = Partidos::findOrFail($id);
+        $partido->tiempo_transcurrido = $request->input('tiempo');
+        $partido->save();
 
-        if ($request->input('equipo') === 'local') {
+        return response()->json(['success' => true]);
+    }*/
+
+   /* public function actualizarEstado($id, Request $request)
+    {
+        $partido = Partidos::findOrFail($id);
+        $partido->estado = $request->input('estado');
+        $partido->save();
+
+        return response()->json(['estado' => $partido->estado]);
+    }*/
+
+    // Actualizar marcador
+    public function actualizarMarcador(Request $request, $id)
+    {
+        $partido = Partidos::findOrFail($id); // Asegúrate de que este sea el modelo correcto
+
+        if ($request->equipo === 'local') {
             $partido->goles_local += 1;
         } else {
             $partido->goles_visitante += 1;
         }
+    
+        $partido->save();
+    
+        return response()->json([
+            'goles_local' => $partido->goles_local,
+            'goles_visitante' => $partido->goles_visitante
+        ]);
+    }
+
+    // Actualizar tarjetas
+    public function actualizarTarjetas(Request $request, $id)
+    {
+        $partido = Partidos::find($id);
+
+        if ($request->equipo === 'local') {
+            if ($request->tipo === 'amarilla') {
+                $partido->tarjetas_amarillas_local += 1;
+            } elseif ($request->tipo === 'roja') {
+                $partido->tarjetas_rojas_local += 1;
+            } else {
+                $partido->tarjetas_verdes_local += 1;
+            }
+        } else {
+            if ($request->tipo === 'amarilla') {
+                $partido->tarjetas_amarillas_visitante += 1;
+            } elseif ($request->tipo === 'roja') {
+                $partido->tarjetas_rojas_visitante += 1;
+            } else {
+                $partido->tarjetas_verdes_visitante += 1;
+            }
+        }
+    
+        $partido->save();
+    
+        return response()->json($partido);
+    }
+
+    // Asignar penal
+    public function asignarPenal(Request $request, $id)
+    {
+        $partido = Partidos::find($id);
+
+    if ($request->equipo === 'local') {
+        $partido->penales_local += 1;
+    } else {
+        $partido->penales_visitante += 1;
+    }
+
+    $partido->save();
+
+    return response()->json($partido);
 
         $partido->save();
+
+        return response()->json([
+            'penales_local' => $partido->penales_local,
+            'penales_visitante' => $partido->penales_visitante,
+        ]);
+    }
+
+    // Actualizar tiempo
+    public function actualizarTiempo($id,Request $request)
+    {
+        //$partido = Partidos::findOrFail($id);
+       // $tiempoTranscurrido = $request->input('tiempo');
+
+        // Aquí se debería implementar la lógica para actualizar el tiempo, si aplica
         
+        $partido = Partidos::findOrFail($id);
+        $partido->tiempoTranscurrido = $request->input('tiempo');
+        $partido->save();
+
+        return response()->json(['success' => true]);
+        
+        return response()->json([
+            'tiempo_transcurrido' => $tiempoTranscurrido,
+        ]);
+    }
+
+    // Actualizar estado
+    public function actualizarEstado(Request $request, $id)
+    {
+        $partido = Partidos::findOrFail($id);
+        $estado = $request->input('estado');
+
+        $partido->estado = $estado;
+        $partido->save();
+
+        return response()->json([
+            'estado' => $partido->estado,
+        ]);
     }
 }

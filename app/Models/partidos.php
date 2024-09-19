@@ -13,31 +13,40 @@ class partidos extends Model
      *
      * @var array<int, string>
      */
+    // La tabla asociada con el modelo
     protected $table = 'partidos';
 
+    // Los atributos que son asignables en masa.
     protected $fillable = [
         'equipo_local_id',
-        'logo_equipo_local',
         'equipo_visitante_id',
-        'logo_equipo_visitante',
         'fecha_juego',
         'hora_juego',
+        'tiempo_seleccionado',
         'goles_local',
         'goles_visitante',
         'tarjetas_amarillas_local',
-        'tarjetas_rojas_local',
-        'tarjetas_verdes_local',
-        'penales_local',
         'tarjetas_amarillas_visitante',
+        'tarjetas_rojas_local',
         'tarjetas_rojas_visitante',
+        'tarjetas_verdes_local',
         'tarjetas_verdes_visitante',
+        'penales_local',
         'penales_visitante',
-        'estado', 
-        'tiempo_seleccionado', 
-        'inicio', 
-        'descanso_inicio'
+        'estado',
+        'inicio',
+        'descanso_inicio',
     ];
 
+    // Los atributos que deberían ser convertidos a tipos de datos nativos.
+    protected $casts = [
+        'fecha_juego' => 'date',
+        'hora_juego' => 'datetime:H:i',
+        'inicio' => 'datetime:H:i',
+        'descanso_inicio' => 'datetime:H:i',
+    ];
+
+    // Definir las relaciones con otros modelos, si es necesario
     public function equipo_local()
     {
         return $this->belongsTo(Equipos::class, 'equipo_local_id');

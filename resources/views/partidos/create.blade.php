@@ -60,6 +60,8 @@
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
+
+
             </div>
 
             <div class="card-footer">

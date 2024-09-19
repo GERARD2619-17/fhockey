@@ -24,7 +24,7 @@ class equipos extends Model
     /**
      * Get the partidos donde el equipo es local.
      */
-    public function partidosLocal()
+    public function equipo_local()
     {
         return $this->hasMany(partidos::class, 'equipo_local_id');
     }
@@ -32,7 +32,7 @@ class equipos extends Model
     /**
      * Get the partidos donde el equipo es visitante.
      */
-    public function partidosVisitante()
+    public function equipo_visitante()
     {
         return $this->hasMany(partidos::class, 'equipo_visitante_id');
     }

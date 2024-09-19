@@ -13,24 +13,45 @@ return new class extends Migration
     {
         Schema::create('partidos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('equipo_local_id')->constrained('equipos')->onDelete('cascade');
-            $table->foreignId('equipo_visitante_id')->constrained('equipos')->onDelete('cascade');
-            $table->string('logo_equipo_local')->nullable(); // Campo para el logo del equipo local
-            $table->string('logo_equipo_visitante')->nullable(); // Campo para el logo del equipo visitante
-            $table->date('fecha_juego'); // Columna para la fecha del juego
-            $table->time('hora_juego');  // Columna para la hora del juego
-            $table->integer('goles_local')->default(0);
-            $table->integer('goles_visitante')->default(0);
-            $table->integer('tiempo_transcurrido')->default(0);
-            $table->enum('estado', ['no_iniciado', 'primer_tiempo', 'segundo_tiempo', 'finalizado'])->default('no_iniciado');
-            $table->integer('tarjetas_amarillas_local')->default(0);
-            $table->integer('tarjetas_rojas_local')->default(0);
-            $table->integer('tarjetas_verdes_local')->default(0);
-            $table->integer('penales_local')->default(0);
-            $table->integer('tarjetas_amarillas_visitante')->default(0);
-            $table->integer('tarjetas_rojas_visitante')->default(0);
-            $table->integer('tarjetas_verdes_visitante')->default(0);
-            $table->integer('penales_visitante')->default(0);
+             // Relaciones con equipos
+             $table->foreignId('equipo_local_id')->constrained('equipos')->onDelete('cascade');
+             $table->foreignId('equipo_visitante_id')->constrained('equipos')->onDelete('cascade');
+             
+             // Logos de los equipos
+             $table->string('logo_equipo_local')->nullable(); 
+             $table->string('logo_equipo_visitante')->nullable(); 
+ 
+             // Fecha y hora del partido
+             $table->date('fecha_juego'); 
+             $table->time('hora_juego');  
+ 
+             // Goles
+             $table->integer('goles_local')->default(0);
+             $table->integer('goles_visitante')->default(0);
+ 
+             // Tiempo transcurrido
+             $table->integer('tiempo_transcurrido')->default(0);
+ 
+             // Estado del partido (con posibilidad de agregar otros estados si es necesario)
+             $table->enum('estado', ['no_iniciado', 'primer_tiempo', 'descanso', 'segundo_tiempo', 'finalizado'])
+                   ->default('no_iniciado');
+ 
+             // Tarjetas y penales para equipo local
+             $table->integer('tarjetas_amarillas_local')->default(0);
+             $table->integer('tarjetas_rojas_local')->default(0);
+             $table->integer('tarjetas_verdes_local')->default(0);
+             $table->integer('penales_local')->default(0);
+ 
+             // Tarjetas y penales para equipo visitante
+             $table->integer('tarjetas_amarillas_visitante')->default(0);
+             $table->integer('tarjetas_rojas_visitante')->default(0);
+             $table->integer('tarjetas_verdes_visitante')->default(0);
+             $table->integer('penales_visitante')->default(0);
+ 
+             // Campos adicionales para control del cronómetro
+             $table->timestamp('inicio')->nullable();  // Marca el inicio del partido
+             $table->timestamp('descanso_inicio')->nullable();  // Marca el inicio del descanso
+             $table->integer('tiempo_seleccionado')->default(0);  // Duración seleccionada del partido en minutos
             $table->timestamps();
         });
     }
