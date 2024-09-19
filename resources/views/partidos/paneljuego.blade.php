@@ -43,7 +43,7 @@
                             <option value="90">90 minutos (2x45)</option>
                         </select>
                     </div>
-                    <button id="iniciarTiempo" class="btn btn-success">Iniciar Tiempo</button>
+                    <button id="iniciarTiempo" class="btn btn-success" onclick="window.gameController.iniciarTiempo()">Iniciar Tiempo</button>
                     <button id="pausarTiempo" class="btn btn-warning" onclick="window.gameController.pausarTiempo()">Pausar</button>
                     <button id="reiniciarTiempo" class="btn btn-danger" onclick="window.gameController.reiniciarTiempo()">Reiniciar</button>
                 </div>
