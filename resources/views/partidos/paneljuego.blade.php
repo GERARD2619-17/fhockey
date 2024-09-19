@@ -43,7 +43,7 @@
                             <option value="90">90 minutos (2x45)</option>
                         </select>
                     </div>
-                    <button id="iniciarTiempo" class="btn btn-success" onclick="window.gameController.iniciarTiempo()">Iniciar Tiempo</button>
+                    <button id="iniciarTiempo" class="btn btn-success">Iniciar Tiempo</button>
                     <button id="pausarTiempo" class="btn btn-warning" onclick="window.gameController.pausarTiempo()">Pausar</button>
                     <button id="reiniciarTiempo" class="btn btn-danger" onclick="window.gameController.reiniciarTiempo()">Reiniciar</button>
                 </div>
@@ -245,7 +245,10 @@
         function actualizarTiempoMostrado() {
             let minutos = Math.floor(segundos / 60);
             let segundosRestantes = segundos % 60;
-            $('#cronometro').text(('0' + minutos).slice(-2) + ':' + ('0' + segundosRestantes).slice(-2));
+            $('#cronometro').text(
+                minutos.toString().padStart(2, '0') + ':' + 
+                segundosRestantes.toString().padStart(2, '0')
+            );
         }
 
         function actualizarTiempoDescanso() {
@@ -258,19 +261,20 @@
         }
 
         function actualizarEstadoJuego(estado) {
-                $.ajax({
-                    url: '/partidos/2/actualizar-estado',  // URL correcta
-                    method: 'PATCH',  // Cambiar POST a PATCH si corresponde
-                    data: {
-                        // Aquí van los datos que envías
-                    },
-                    success: function(response) {
-                        console.log('Estado del partido actualizado correctamente');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error al actualizar estado del partido:', error);
-                    }
-                });
+            $.ajax({
+                url: '{{ route('partidos.actualizarEstado', $partido->id) }}',
+                method: 'POST',
+                data: {
+                    estado: estado,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    $('#estadoPartido').text('Estado: ' + data.estado);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al actualizar estado:", status, error);
+                }
+            });
         }
 
         function actualizarTiempoServidor() {
@@ -278,15 +282,11 @@
                 url: '{{ route('partidos.actualizarTiempo', $partido->id) }}',
                 method: 'POST',
                 data: {
-                    tiempo_transcurrido: segundos,
-                    estado: periodoActual,
+                    tiempo: segundos,
                     _token: '{{ csrf_token() }}'
                 },
-                success: function(data) {
-                    console.log("Tiempo actualizado en el servidor");
-                },
                 error: function(xhr, status, error) {
-                    console.error("Error al actualizar tiempo:", status, error);
+                    console.error("Error al actualizar tiempo en el servidor:", status, error);
                 }
             });
         }
