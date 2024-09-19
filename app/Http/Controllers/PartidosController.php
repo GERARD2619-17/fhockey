@@ -292,8 +292,12 @@ class PartidosController extends Controller
     }
 
     // Actualizar estado
-    public function actualizarEstado(Request $request, $id)
+    public function actualizarEstado(Request $request, Partidos $partido)
     {
+        $estado = $request->input('estado');
+        $partido->update(['estado' => $estado]);
+        return response()->json(['estado' => $partido->estado]);
+        /*
         $partido = Partidos::findOrFail($id);
         $estado = $request->input('estado');
 
@@ -302,6 +306,6 @@ class PartidosController extends Controller
 
         return response()->json([
             'estado' => $partido->estado,
-        ]);
+        ]);*/
     }
 }
