@@ -107,6 +107,26 @@
                         actualizarEstadoJuego(periodoActual);
                     }
                     iniciarCronometroJuego();
+                    
+                    // Enviar tiempo seleccionado al servidor
+                    $.ajax({
+                    url: '{{ route('partidos.actualizarTiempoSeleccionado', $partido->id) }}',
+                    method: 'POST',
+                    data: {
+                        tiempo_seleccionado: tiempoSeleccionado,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log('Tiempo seleccionado actualizado:', response.tiempo_seleccionado);
+                        } else {
+                            console.error('Error al actualizar tiempo seleccionado');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error al actualizar tiempo seleccionado:", status, error);
+                    }
+                });
                 }
             },
 
@@ -279,15 +299,22 @@
 
         function actualizarTiempoServidor() {
             $.ajax({
-                url: '{{ route('partidos.actualizarTiempo', $partido->id) }}',
-                method: 'POST',
-                data: {
-                    tiempo: segundos,
-                    _token: '{{ csrf_token() }}'
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error al actualizar tiempo en el servidor:", status, error);
+            url: '{{ route('partidos.actualizarTiempo', $partido->id) }}',
+            method: 'POST',
+            data: {
+                tiempo: segundos,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    console.log('Tiempo transcurrido actualizado:', response.tiempo_transcurrido);
+                } else {
+                    console.error('Error al actualizar tiempo transcurrido');
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al actualizar tiempo en el servidor:", status, error);
+            }
             });
         }
     })();
