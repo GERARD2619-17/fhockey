@@ -89,7 +89,7 @@
         window.gameController = {
             iniciarTiempo: function() {
                 if (!enEjecucion) {
-                    // Configurar tiempos segÃºn la selecciÃ³n
+                    // Configurar tiempos segun la seleccion
                     const tiempoSeleccionado = parseInt($('#tiempo_seleccionado').val());
                     if (tiempoSeleccionado === 20) {
                         tiempoTotalJuego = 1200; // 20 minutos en segundos
