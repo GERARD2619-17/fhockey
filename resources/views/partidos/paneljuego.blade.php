@@ -22,11 +22,11 @@
                     <p>Tarjetas Amarillas: <span id="tarjetasAmarillasLocal">{{ $partido->tarjetas_amarillas_local }}</span></p>
                     <p>Tarjetas Rojas: <span id="tarjetasRojasLocal">{{ $partido->tarjetas_rojas_local }}</span></p>
                     <p>Tarjetas Verdes: <span id="tarjetasVerdesLocal">{{ $partido->tarjetas_verdes_local }}</span></p>
-                    <button class="btn btn-success" onclick="window.gameController.agregarGol('local')">AÃ±adir Gol Local</button>
+                    <button class="btn btn-success" onclick="window.gameController.agregarGol('local')">Añadir Gol Local</button>
                     <button class="btn btn-primary" onclick="window.gameController.asignarPenal('local')">Asignar Penal Local</button>
-                    <button class="btn btn-warning" onclick="window.gameController.agregarTarjeta('local', 'amarilla')">AÃ±adir Tarjeta Amarilla</button>
-                    <button class="btn btn-danger" onclick="window.gameController.agregarTarjeta('local', 'roja')">AÃ±adir Tarjeta Roja</button>
-                    <button class="btn btn-success" onclick="window.gameController.agregarTarjeta('local', 'verde')">AÃ±adir Tarjeta Verde</button>
+                    <button class="btn btn-warning" onclick="window.gameController.agregarTarjeta('local', 'amarilla')">Añadir Tarjeta Amarilla</button>
+                    <button class="btn btn-danger" onclick="window.gameController.agregarTarjeta('local', 'roja')">Añadir Tarjeta Roja</button>
+                    <button class="btn btn-success" onclick="window.gameController.agregarTarjeta('local', 'verde')">Añadir Tarjeta Verde</button>
                 </div>
 
                 <!-- Cronómetro -->
@@ -57,11 +57,11 @@
                     <p>Tarjetas Amarillas: <span id="tarjetasAmarillasVisitante">{{ $partido->tarjetas_amarillas_visitante }}</span></p>
                     <p>Tarjetas Rojas: <span id="tarjetasRojasVisitante">{{ $partido->tarjetas_rojas_visitante }}</span></p>
                     <p>Tarjetas Verdes: <span id="tarjetasVerdesVisitante">{{ $partido->tarjetas_verdes_visitante }}</span></p>
-                    <button class="btn btn-success" onclick="window.gameController.agregarGol('visitante')">AÃ±adir Gol Visitante</button>
+                    <button class="btn btn-success" onclick="window.gameController.agregarGol('visitante')">Añadir Gol Visitante</button>
                     <button class="btn btn-primary" onclick="window.gameController.asignarPenal('visitante')">Asignar Penal Visitante</button>
-                    <button class="btn btn-warning" onclick="window.gameController.agregarTarjeta('visitante', 'amarilla')">AÃ±adir Tarjeta Amarilla</button>
-                    <button class="btn btn-danger" onclick="window.gameController.agregarTarjeta('visitante', 'roja')">AÃ±adir Tarjeta Roja</button>
-                    <button class="btn btn-success" onclick="window.gameController.agregarTarjeta('visitante', 'verde')">AÃ±adir Tarjeta Verde</button>
+                    <button class="btn btn-warning" onclick="window.gameController.agregarTarjeta('visitante', 'amarilla')">Añadir Tarjeta Amarilla</button>
+                    <button class="btn btn-danger" onclick="window.gameController.agregarTarjeta('visitante', 'roja')">Añadir Tarjeta Roja</button>
+                    <button class="btn btn-success" onclick="window.gameController.agregarTarjeta('visitante', 'verde')">Añadir Tarjeta Verde</button>
                 </div>
             </div>
         </div>
