@@ -33,6 +33,7 @@
                 <div class="col-md-4">
                     <h4>Cronómetro</h4>
                     <p id="cronometro">00:00</p>
+                    <span id="tiempoExtra" style="display:none;"></span>
                     <p id="estadoPartido">Estado: {{ $partido->estado }}</p>
                     <p id="labelDescanso" style="display:none;">Tiempo de descanso: <span id="descansoTiempo">00:00</span></p>
                     
@@ -74,42 +75,45 @@
 
 @section('js')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    (function() {
-        let timer;
-        let segundos = {{ $partido->tiempo_transcurrido }};
-        let enEjecucion = false;
-        let periodoActual = '{{ $partido->estado }}';
-        let timerDescanso;
-        let segundosDescanso = 0;
-        let tiempoTotalJuego = 0;
-        let tiempoMitad = 0;
-        let tiempoDescanso = 0;
+(function() {
+    let timer;
+    let segundos = {{ $partido->tiempo_transcurrido }};
+    let enEjecucion = false;
+    let periodoActual = '{{ $partido->estado }}';
+    let timerDescanso;
+    let segundosDescanso = 0;
+    let tiempoTotalJuego = 0;
+    let tiempoMitad = 0;
+    let tiempoDescanso = 0;
+    let tiempoExtra = 0;
+    let alertaMostrada = false;
+    let tiempoExtraAgregado = 0;
+    let tiempoVisual = 0;
+    let alertaSegundoTiempoMostrada = false;
 
-        window.gameController = {
-            iniciarTiempo: function() {
-                if (!enEjecucion) {
-                    // Configurar tiempos segun la seleccion
-                    const tiempoSeleccionado = parseInt($('#tiempo_seleccionado').val());
-                    if (tiempoSeleccionado === 20) {
-                        tiempoTotalJuego = 1200; // 20 minutos en segundos
-                        tiempoMitad = 600; // 10 minutos en segundos
-                        tiempoDescanso = 120; // 2 minutos en segundos
-                    } else if (tiempoSeleccionado === 90) {
-                        tiempoTotalJuego = 5400; // 90 minutos en segundos
-                        tiempoMitad = 2700; // 45 minutos en segundos
-                        tiempoDescanso = 900; // 15 minutos en segundos
-                    }
+    window.gameController = {
+        iniciarTiempo: function() {
+            if (!enEjecucion) {
+                const tiempoSeleccionado = parseInt($('#tiempo_seleccionado').val());
+                if (tiempoSeleccionado === 20) {
+                    tiempoTotalJuego = 1200; // 20 minutos en segundos
+                    tiempoMitad = 600; // 10 minutos en segundos
+                    tiempoDescanso = 120; // 2 minutos en segundos
+                } else if (tiempoSeleccionado === 90) {
+                    tiempoTotalJuego = 5400; // 90 minutos en segundos
+                    tiempoMitad = 2700; // 45 minutos en segundos
+                    tiempoDescanso = 900; // 15 minutos en segundos
+                }
 
-                    // Iniciar el primer tiempo si el partido no ha comenzado
-                    if (periodoActual === 'no_iniciado') {
-                        periodoActual = 'primer_tiempo';
-                        actualizarEstadoJuego(periodoActual);
-                    }
-                    iniciarCronometroJuego();
-                    
-                    // Enviar tiempo seleccionado al servidor
-                    $.ajax({
+                if (periodoActual === 'no_iniciado') {
+                    periodoActual = 'primer_tiempo';
+                    actualizarEstadoJuego(periodoActual);
+                }
+                iniciarCronometroJuego();
+                
+                $.ajax({
                     url: '{{ route('partidos.actualizarTiempoSeleccionado', $partido->id) }}',
                     method: 'POST',
                     data: {
@@ -127,178 +131,209 @@
                         console.error("Error al actualizar tiempo seleccionado:", status, error);
                     }
                 });
-                }
-            },
-
-            pausarTiempo: function() {
-                if (enEjecucion) {
-                    clearInterval(timer);
-                    enEjecucion = false;
-                    $('#iniciarTiempo').prop('disabled', false).text('Reanudar');
-                    actualizarTiempoServidor();
-                }
-            },
-
-            reiniciarTiempo: function() {
-                clearInterval(timer);
-                clearInterval(timerDescanso);
-                segundos = 0;
-                segundosDescanso = 0;
-                enEjecucion = false;
-                periodoActual = 'no_iniciado';
-                actualizarTiempoMostrado();
-                actualizarEstadoJuego(periodoActual);
-                $('#iniciarTiempo').prop('disabled', false).text('Iniciar Tiempo');
-                $('#labelDescanso').hide();
-                actualizarTiempoServidor();
-            },
-
-            agregarGol: function(equipo) {
-                $.ajax({
-                    url: '{{ route('partidos.actualizarMarcador', $partido->id) }}',
-                    method: 'POST',
-                    data: {
-                        equipo: equipo,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(data) {
-                        $(`#goles${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`goles_${equipo}`]);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error al actualizar goles:", status, error);
-                        console.log(xhr.responseText);
-                    }
-                });
-            },
-
-            agregarTarjeta: function(equipo, tipo) {
-                $.ajax({
-                    url: '{{ route('partidos.actualizarTarjetas', $partido->id) }}',
-                    method: 'POST',
-                    data: {
-                        equipo: equipo,
-                        tipo: tipo,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(data) {
-                        $(`#tarjetas${tipo.charAt(0).toUpperCase() + tipo.slice(1)}s${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`tarjetas_${tipo}s_${equipo}`]);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error al actualizar tarjetas:", status, error);
-                        console.log(xhr.responseText);
-                    }
-                });
-            },
-
-            asignarPenal: function(equipo) {
-                $.ajax({
-                    url: '{{ route('partidos.asignarPenal', $partido->id) }}',
-                    method: 'POST',
-                    data: {
-                        equipo: equipo,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(data) {
-                        $(`#penales${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`penales_${equipo}`]);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error al asignar penal:", status, error);
-                        console.log(xhr.responseText);
-                    }
-                });
             }
-        };
+        },
 
-        function iniciarCronometroJuego() {
-            enEjecucion = true;
-            $('#iniciarTiempo').prop('disabled', true);
-            timer = setInterval(function() {
-                segundos++;
-                actualizarTiempoMostrado();
-                if (segundos % 10 === 0) {
-                    actualizarTiempoServidor();
-                }
-                
-                if (segundos === tiempoMitad && periodoActual === 'primer_tiempo') {
-                    manejarMedioTiempo();
-                } else if (segundos === tiempoTotalJuego) {
-                    manejarFinJuego();
-                }
-            }, 1000);
-        }
+        pausarTiempo: function() {
+            if (enEjecucion) {
+                clearInterval(timer);
+                enEjecucion = false;
+                $('#iniciarTiempo').prop('disabled', false).text('Reanudar');
+                actualizarTiempoServidor();
+            }
+        },
 
-        function manejarMedioTiempo() {
+        reiniciarTiempo: function() {
             clearInterval(timer);
-            periodoActual = 'descanso';
-            actualizarEstadoJuego(periodoActual);
-            iniciarCronometroDescanso();
-        }
-
-        function iniciarCronometroDescanso() {
-            $('#labelDescanso').show();
-            timerDescanso = setInterval(function() {
-                segundosDescanso++;
-                actualizarTiempoDescanso();
-                if (segundosDescanso === tiempoDescanso) {
-                    manejarSegundoTiempo();
-                }
-            }, 1000);
-        }
-
-        function manejarSegundoTiempo() {
             clearInterval(timerDescanso);
-            $('#labelDescanso').hide();
+            segundos = 0;
             segundosDescanso = 0;
-            periodoActual = 'segundo_tiempo';
-            actualizarEstadoJuego(periodoActual);
-            iniciarCronometroJuego();
-        }
-
-        function manejarFinJuego() {
-            clearInterval(timer);
+            tiempoExtra = 0;
+            tiempoExtraAgregado = 0;
+            tiempoVisual = 0;
             enEjecucion = false;
-            periodoActual = 'finalizado';
+            periodoActual = 'no_iniciado';
+            alertaMostrada = false;
+            alertaSegundoTiempoMostrada = false;
+            actualizarTiempoMostrado();
             actualizarEstadoJuego(periodoActual);
-            $('#iniciarTiempo').prop('disabled', true);
-        }
+            $('#iniciarTiempo').prop('disabled', false).text('Iniciar Tiempo');
+            $('#labelDescanso').hide();
+            $('#tiempoExtra').hide();
+            actualizarTiempoServidor();
+        },
 
-        function actualizarTiempoMostrado() {
-            let minutos = Math.floor(segundos / 60);
-            let segundosRestantes = segundos % 60;
-            $('#cronometro').text(
-                minutos.toString().padStart(2, '0') + ':' + 
-                segundosRestantes.toString().padStart(2, '0')
-            );
-        }
-
-        function actualizarTiempoDescanso() {
-            let minutos = Math.floor(segundosDescanso / 60);
-            let segundosRestantes = segundosDescanso % 60;
-            $('#descansoTiempo').text(
-                minutos.toString().padStart(2, '0') + ':' + 
-                segundosRestantes.toString().padStart(2, '0')
-            );
-        }
-
-        function actualizarEstadoJuego(estado) {
+        agregarGol: function(equipo) {
             $.ajax({
-                url: '{{ route('partidos.actualizarEstado', $partido->id) }}',
+                url: '{{ route('partidos.actualizarMarcador', $partido->id) }}',
                 method: 'POST',
                 data: {
-                    estado: estado,
+                    equipo: equipo,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
-                    $('#estadoPartido').text('Estado: ' + data.estado);
+                    $(`#goles${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`goles_${equipo}`]);
                 },
                 error: function(xhr, status, error) {
-                    console.error("Error al actualizar estado:", status, error);
+                    console.error("Error al actualizar goles:", status, error);
+                    console.log(xhr.responseText);
                 }
             });
-        }
+        },
 
-        function actualizarTiempoServidor() {
+        agregarTarjeta: function(equipo, tipo) {
             $.ajax({
+                url: '{{ route('partidos.actualizarTarjetas', $partido->id) }}',
+                method: 'POST',
+                data: {
+                    equipo: equipo,
+                    tipo: tipo,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    $(`#tarjetas${tipo.charAt(0).toUpperCase() + tipo.slice(1)}s${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`tarjetas_${tipo}s_${equipo}`]);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al actualizar tarjetas:", status, error);
+                    console.log(xhr.responseText);
+                }
+            });
+        },
+
+        asignarPenal: function(equipo) {
+            $.ajax({
+                url: '{{ route('partidos.asignarPenal', $partido->id) }}',
+                method: 'POST',
+                data: {
+                    equipo: equipo,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    $(`#penales${equipo.charAt(0).toUpperCase() + equipo.slice(1)}`).text(data[`penales_${equipo}`]);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al asignar penal:", status, error);
+                    console.log(xhr.responseText);
+                }
+            });
+        },
+
+        agregarTiempoExtra: function(minutos) {
+            tiempoExtraAgregado += minutos * 60;
+            actualizarTiempoMostrado();
+        }
+    };
+
+    function iniciarCronometroJuego() {
+        enEjecucion = true;
+        $('#iniciarTiempo').prop('disabled', true);
+        timer = setInterval(function() {
+            segundos++;
+            tiempoVisual++;
+            actualizarTiempoMostrado();
+            if (segundos % 10 === 0) {
+                actualizarTiempoServidor();
+            }
+            
+            if (periodoActual === 'primer_tiempo' && !alertaMostrada && segundos === tiempoMitad - 60) {
+                mostrarAlertaFinPrimerTiempo();
+            }
+            
+            if (periodoActual === 'segundo_tiempo' && !alertaSegundoTiempoMostrada && segundos === tiempoTotalJuego - 60) {
+                mostrarAlertaFinSegundoTiempo();
+            }
+            
+            let tiempoLimite = tiempoTotalJuego + tiempoExtraAgregado;
+            if (segundos === tiempoLimite) {
+                manejarFinJuego();
+            } else if (segundos === tiempoMitad) {
+                manejarMedioTiempo();
+            }
+        }, 1000);
+    }
+
+    function manejarMedioTiempo() {
+        clearInterval(timer);
+        periodoActual = 'descanso';
+        tiempoExtra = 0;
+        $('#tiempoExtra').hide();
+        actualizarEstadoJuego(periodoActual);
+        iniciarCronometroDescanso();
+    }
+
+    function iniciarCronometroDescanso() {
+        $('#labelDescanso').show();
+        timerDescanso = setInterval(function() {
+            segundosDescanso++;
+            actualizarTiempoDescanso();
+            if (segundosDescanso === tiempoDescanso) {
+                manejarSegundoTiempo();
+            }
+        }, 1000);
+    }
+
+    function manejarSegundoTiempo() {
+        clearInterval(timerDescanso);
+        $('#labelDescanso').hide();
+        segundosDescanso = 0;
+        periodoActual = 'segundo_tiempo';
+        tiempoVisual = 0; // Reinicia el tiempo visual
+        actualizarEstadoJuego(periodoActual);
+        iniciarCronometroJuego();
+    }
+
+    function manejarFinJuego() {
+        clearInterval(timer);
+        enEjecucion = false;
+        periodoActual = 'finalizado';
+        actualizarEstadoJuego(periodoActual);
+        $('#iniciarTiempo').prop('disabled', true);
+        mostrarAlertaFinJuego();
+    }
+
+    function actualizarTiempoMostrado() {
+        let tiempoMostrado = periodoActual === 'segundo_tiempo' ? tiempoVisual + tiempoMitad : tiempoVisual;
+        let minutos = Math.floor(tiempoMostrado / 60);
+        let segundosRestantes = tiempoMostrado % 60;
+        $('#cronometro').text(
+            minutos.toString().padStart(2, '0') + ':' + 
+            segundosRestantes.toString().padStart(2, '0')
+        );
+        if (tiempoExtraAgregado > 0) {
+            $('#tiempoExtra').show().text('+ ' + Math.floor(tiempoExtraAgregado / 60) + ' min');
+        } else {
+            $('#tiempoExtra').hide();
+        }
+    }
+
+    function actualizarTiempoDescanso() {
+        let minutos = Math.floor(segundosDescanso / 60);
+        let segundosRestantes = segundosDescanso % 60;
+        $('#descansoTiempo').text(
+            minutos.toString().padStart(2, '0') + ':' + 
+            segundosRestantes.toString().padStart(2, '0')
+        );
+    }
+
+    function actualizarEstadoJuego(estado) {
+        $.ajax({
+            url: '{{ route('partidos.actualizarEstado', $partido->id) }}',
+            method: 'POST',
+            data: {
+                estado: estado,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(data) {
+                $('#estadoPartido').text('Estado: ' + data.estado);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al actualizar estado:", status, error);
+            }
+        });
+    }
+
+    function actualizarTiempoServidor() {
+        $.ajax({
             url: '{{ route('partidos.actualizarTiempo', $partido->id) }}',
             method: 'POST',
             data: {
@@ -315,8 +350,80 @@
             error: function(xhr, status, error) {
                 console.error("Error al actualizar tiempo en el servidor:", status, error);
             }
-            });
-        }
-    })();
+        });
+    }
+
+    function mostrarAlertaFinPrimerTiempo() {
+        alertaMostrada = true;
+        reproducirSonidoAlerta();
+        Swal.fire({
+            title: '¡Atención!',
+            text: 'Faltan 5 minutos para el final del primer tiempo. ¿Deseas agregar tiempo extra?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, agregar tiempo',
+            cancelButtonText: 'No, continuar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                pedirTiempoExtra();
+            }
+        });
+    }
+
+    function mostrarAlertaFinSegundoTiempo() {
+        alertaSegundoTiempoMostrada = true;
+        reproducirSonidoAlerta();
+        Swal.fire({
+            title: '¡Atención!',
+            text: 'Faltan 5 minutos para el final del segundo tiempo. ¿Deseas agregar tiempo extra?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, agregar tiempo',
+            cancelButtonText: 'No, continuar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                pedirTiempoExtra();
+            }
+        });
+    }
+
+    function mostrarAlertaFinJuego() {
+        reproducirSonidoAlerta();
+        Swal.fire({
+            title: 'Fin del partido',
+            text: 'El partido ha finalizado.',
+            icon: 'info',
+            confirmButtonText: 'Aceptar'
+        });
+    }
+
+    function reproducirSonidoAlerta() {
+        let audio = new Audio('/ruta/a/tu/sonido/alerta.mp3');
+        audio.play();
+    }
+
+    function pedirTiempoExtra() {
+        Swal.fire({
+            title: 'Agregar Tiempo Extra',
+            input: 'number',
+            inputLabel: 'Minutos a agregar',
+            inputPlaceholder: 'Ingrese los minutos',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value || value <= 0) {
+                    return 'Por favor, ingrese un número válido de minutos';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let minutosExtra = parseInt(result.value);
+                gameController.agregarTiempoExtra(minutosExtra);
+                if (!enEjecucion) {
+                    iniciarCronometroJuego();
+                }
+            }
+        });
+    }
+})();
 </script>
 @stop
