@@ -23,6 +23,7 @@ class partidos extends Model
         'fecha_juego',
         'hora_juego',
         'tiempo_seleccionado',
+        'tiempo_transcurrido',
         'goles_local',
         'goles_visitante',
         'tarjetas_amarillas_local',

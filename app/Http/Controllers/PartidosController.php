@@ -169,7 +169,7 @@ class PartidosController extends Controller
 
         $partido->delete();
 
-        return redirect()->route('partidos.index')->with('success', 'Partido eliminado con éxito.');
+        return redirect()->route('partidos.index')->with('success', 'Partido eliminado con Ã©xito.');
     }
 
     /**
@@ -205,7 +205,7 @@ class PartidosController extends Controller
     // Actualizar marcador
     public function actualizarMarcador(Request $request, $id)
     {
-        $partido = Partidos::findOrFail($id); // Asegúrate de que este sea el modelo correcto
+        $partido = Partidos::findOrFail($id); // AsegÃºrate de que este sea el modelo correcto
 
         if ($request->equipo === 'local') {
             $partido->goles_local += 1;
@@ -278,7 +278,7 @@ class PartidosController extends Controller
         //$partido = Partidos::findOrFail($id);
        // $tiempoTranscurrido = $request->input('tiempo');
 
-        // Aquí se debería implementar la lógica para actualizar el tiempo, si aplica
+        // AquÃ­ se deberÃ­a implementar la lÃ³gica para actualizar el tiempo, si aplica
         
         $partido = Partidos::findOrFail($id);
         $partido->tiempoTranscurrido = $request->input('tiempo');
