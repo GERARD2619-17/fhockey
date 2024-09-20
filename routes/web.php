@@ -50,8 +50,8 @@ Route::middleware([
     Route::get('partidos/{id}', [PartidosController::class, 'show'])->name('partidos.show');
     Route::get('partidos/{id}/paneljuego', [PartidosController::class, 'paneljuego'])->name('partidos.paneljuego');
     Route::post('partidos/{id}/actualizar-marcador', [PartidosController::class, 'actualizarMarcador'])->name('partidos.actualizarMarcador');
-    Route::post('/partidos/{partido}/actualizar-tiempo', [PartidosController::class, 'actualizarTiempo'])->name('partidos.actualizarTiempo');
     Route::post('/partidos/{partido}/actualizar-tiempo-seleccionado', [PartidosController::class, 'actualizarTiempoSeleccionado'])->name('partidos.actualizarTiempoSeleccionado');
+    Route::post('/partidos/{partido}/actualizar-tiempo', [PartidosController::class, 'actualizarTiempo'])->name('partidos.actualizarTiempo');
     Route::post('/partidos/{partido}/actualizar-estado', [PartidosController::class, 'actualizarEstado'])->name('partidos.actualizarEstado');
     Route::post('partidos/{id}/actualizar-tarjetas', [PartidosController::class, 'actualizarTarjetas'])->name('partidos.actualizarTarjetas');
     Route::post('partidos/{id}/asignar-penal', [PartidosController::class, 'asignarPenal'])->name('partidos.asignarPenal');

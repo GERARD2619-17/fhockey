@@ -273,23 +273,23 @@ class PartidosController extends Controller
     }
 
     // Actualizar tiempo
-    public function actualizarTiempo($id,Request $request)
-    {
-        //$partido = Partidos::findOrFail($id);
-       // $tiempoTranscurrido = $request->input('tiempo');
+    public function actualizarTiempoSeleccionado(Request $request, Partidos $partido)
+{
+    $partido->update([
+        'tiempo_seleccionado' => $request->tiempo_seleccionado
+    ]);
 
-        // AquÃ­ se deberÃ­a implementar la lÃ³gica para actualizar el tiempo, si aplica
-        
-        $partido = Partidos::findOrFail($id);
-        $partido->tiempoTranscurrido = $request->input('tiempo');
-        $partido->save();
+    return response()->json(['success' => true]);
+}
 
-        return response()->json(['success' => true]);
-        
-        return response()->json([
-            'tiempo_transcurrido' => $tiempoTranscurrido,
-        ]);
-    }
+public function actualizarTiempo(Request $request, Partidos $partido)
+{
+    $partido->update([
+        'tiempo_transcurrido' => $request->tiempo
+    ]);
+
+    return response()->json(['success' => true]);
+}
 
     // Actualizar estado
     public function actualizarEstado(Request $request, Partidos $partido)
