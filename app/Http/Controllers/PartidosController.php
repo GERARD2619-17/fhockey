@@ -184,24 +184,6 @@ class PartidosController extends Controller
     /**
      * Update the goals for the specified partido.
      */
-    /*public function actualizarTiempo($id, Request $request)
-    {
-        $partido = Partidos::findOrFail($id);
-        $partido->tiempo_transcurrido = $request->input('tiempo');
-        $partido->save();
-
-        return response()->json(['success' => true]);
-    }*/
-
-   /* public function actualizarEstado($id, Request $request)
-    {
-        $partido = Partidos::findOrFail($id);
-        $partido->estado = $request->input('estado');
-        $partido->save();
-
-        return response()->json(['estado' => $partido->estado]);
-    }*/
-
     // Actualizar marcador
     public function actualizarMarcador(Request $request, $id)
     {
@@ -315,15 +297,5 @@ class PartidosController extends Controller
         $estado = $request->input('estado');
         $partido->update(['estado' => $estado]);
         return response()->json(['estado' => $partido->estado]);
-        /*
-        $partido = Partidos::findOrFail($id);
-        $estado = $request->input('estado');
-
-        $partido->estado = $estado;
-        $partido->save();
-
-        return response()->json([
-            'estado' => $partido->estado,
-        ]);*/
     }
 }
