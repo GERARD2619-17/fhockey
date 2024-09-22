@@ -91,7 +91,6 @@
     let alertaMostrada = false;
     let tiempoExtraAgregado = 0;
     let tiempoVisual = 0;
-    let alertaSegundoTiempoMostrada = false;
 
     window.gameController = {
         iniciarTiempo: function() {
@@ -154,7 +153,6 @@
             enEjecucion = false;
             periodoActual = 'no_iniciado';
             alertaMostrada = false;
-            alertaSegundoTiempoMostrada = false;
             actualizarTiempoMostrado();
             actualizarEstadoJuego(periodoActual);
             $('#iniciarTiempo').prop('disabled', false).text('Iniciar Tiempo');
@@ -235,27 +233,45 @@
                 actualizarTiempoServidor();
             }
             
-            if (periodoActual === 'primer_tiempo' && !alertaMostrada && segundos === tiempoMitad - 60) {
-                mostrarAlertaFinPrimerTiempo();
+            let tiempoLimite = periodoActual === 'primer_tiempo' ? tiempoMitad : tiempoTotalJuego;
+            let tiempoExtraActual = periodoActual === 'primer_tiempo' ? tiempoExtraPrimerTiempo : tiempoExtraSegundoTiempo;
+            
+            if (!alertaMostrada && 
+                ((periodoActual === 'primer_tiempo' && segundos === tiempoMitad - 300) ||
+                 (periodoActual === 'segundo_tiempo' && segundos === tiempoTotalJuego - 300))) {
+                mostrarAlertaFinTiempo();
             }
             
-            if (periodoActual === 'segundo_tiempo' && !alertaSegundoTiempoMostrada && segundos === tiempoTotalJuego - 60) {
-                mostrarAlertaFinSegundoTiempo();
-            }
-            
-            let tiempoLimite = tiempoTotalJuego + tiempoExtraAgregado;
-            if (segundos === tiempoLimite) {
-                manejarFinJuego();
-            } else if (segundos === tiempoMitad) {
-                manejarMedioTiempo();
+            if (segundos === tiempoLimite + tiempoExtraActual) {
+                if (tiempoExtraAgregado > 0) {
+                    if (periodoActual === 'primer_tiempo') {
+                        tiempoExtraPrimerTiempo += tiempoExtraAgregado;
+                    } else {
+                        tiempoExtraSegundoTiempo += tiempoExtraAgregado;
+                    }
+                    tiempoExtraAgregado = 0;
+                    actualizarTiempoExtraServidor();
+                } else {
+                    manejarFinPeriodo();
+                }
             }
         }, 1000);
+    }
+
+    function manejarFinPeriodo() {
+        if (periodoActual === 'primer_tiempo') {
+            manejarMedioTiempo();
+        } else if (periodoActual === 'segundo_tiempo') {
+            manejarFinJuego();
+        }
     }
 
     function manejarMedioTiempo() {
         clearInterval(timer);
         periodoActual = 'descanso';
         tiempoExtra = 0;
+        tiempoExtraAgregado = 0;  // Resetear tiempo extra agregado
+        alertaMostrada = false;
         $('#tiempoExtra').hide();
         actualizarEstadoJuego(periodoActual);
         iniciarCronometroDescanso();
@@ -278,6 +294,9 @@
         segundosDescanso = 0;
         periodoActual = 'segundo_tiempo';
         tiempoVisual = 0; // Reinicia el tiempo visual
+        segundos = tiempoMitad; // Iniciar segundos desde la mitad del tiempo total
+        tiempoExtra = 0; // Resetear tiempo extra
+        tiempoExtraAgregado = 0; // Resetear tiempo extra agregado
         actualizarEstadoJuego(periodoActual);
         iniciarCronometroJuego();
     }
@@ -288,6 +307,7 @@
         periodoActual = 'finalizado';
         actualizarEstadoJuego(periodoActual);
         $('#iniciarTiempo').prop('disabled', true);
+        $('#tiempoExtra').hide(); // Ocultar el tiempo extra al finalizar el juego
         mostrarAlertaFinJuego();
     }
 
@@ -299,8 +319,9 @@
             minutos.toString().padStart(2, '0') + ':' + 
             segundosRestantes.toString().padStart(2, '0')
         );
-        if (tiempoExtraAgregado > 0) {
-            $('#tiempoExtra').show().text('+ ' + Math.floor(tiempoExtraAgregado / 60) + ' min');
+        if (tiempoExtra > 0 || tiempoExtraAgregado > 0) {
+            let tiempoExtraMostrado = tiempoExtra + tiempoExtraAgregado;
+            $('#tiempoExtra').show().text('+ ' + Math.floor(tiempoExtraMostrado / 60) + ' min');
         } else {
             $('#tiempoExtra').hide();
         }
@@ -353,12 +374,12 @@
         });
     }
 
-    function mostrarAlertaFinPrimerTiempo() {
+    function mostrarAlertaFinTiempo() {
         alertaMostrada = true;
         reproducirSonidoAlerta();
         Swal.fire({
             title: '¡Atención!',
-            text: 'Faltan 5 minutos para el final del primer tiempo. ¿Deseas agregar tiempo extra?',
+            text: `Faltan 5 minutos para el final del ${periodoActual === 'primer_tiempo' ? 'primer' : 'segundo'} tiempo. ¿Deseas agregar tiempo extra?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, agregar tiempo',
@@ -367,33 +388,6 @@
             if (result.isConfirmed) {
                 pedirTiempoExtra();
             }
-        });
-    }
-
-    function mostrarAlertaFinSegundoTiempo() {
-        alertaSegundoTiempoMostrada = true;
-        reproducirSonidoAlerta();
-        Swal.fire({
-            title: '¡Atención!',
-            text: 'Faltan 5 minutos para el final del segundo tiempo. ¿Deseas agregar tiempo extra?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, agregar tiempo',
-            cancelButtonText: 'No, continuar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                pedirTiempoExtra();
-            }
-        });
-    }
-
-    function mostrarAlertaFinJuego() {
-        reproducirSonidoAlerta();
-        Swal.fire({
-            title: 'Fin del partido',
-            text: 'El partido ha finalizado.',
-            icon: 'info',
-            confirmButtonText: 'Aceptar'
         });
     }
 
@@ -422,6 +416,15 @@
                     iniciarCronometroJuego();
                 }
             }
+        });
+    }
+
+    function mostrarAlertaFinJuego() {
+        Swal.fire({
+            title: '¡Partido Finalizado!',
+            text: 'El partido ha terminado.',
+            icon: 'info',
+            confirmButtonText: 'Aceptar'
         });
     }
 })();
