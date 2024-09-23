@@ -59,8 +59,8 @@
                             No disponible
                         @endif
                     </td>
-                    <td>{{ $partido->fecha_juego }}</td>
-                    <td>{{ $partido->hora_juego }}</td>
+                    <td>{{ \Carbon\Carbon::parse($partido->fecha_juego)->format('d/m/Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($partido->hora_juego)->format('H:i') }}</td>
                     <td>{{ ucfirst($partido->estado) }}</td>
                     <td class="actions-column">
                         <a href="{{ route('partidos.show', $partido->id) }}" class="btn btn-info btn-sm">Ver</a>

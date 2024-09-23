@@ -7,56 +7,62 @@
 @stop
 
 @section('content')
-    <form action="{{ route('partidos.update', $partido->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('partidos.update', $partido->id) }}" method="POST">
         @csrf
         @method('PUT')
-        <div class="form-group">
-            <label for="equipo_local">Equipo Local</label>
-            <input type="text" name="equipo_local" id="equipo_local" class="form-control" value="{{ $partido->equipo_local }}" required>
+        
+        <div class="row">
+            <div class="col-md-5 text-center">
+                <h4>{{ $partido->equipo_local->nombre }}</h4>
+                @php
+                    $fotografiaLocal = $partido->equipo_local->fotografia ?? null;
+                    $fotografiaLocal = $fotografiaLocal ? str_replace('\\', '/', $fotografiaLocal) : null;
+                @endphp
+                @if($fotografiaLocal)
+                    <img src="{{ asset('storage/' . $fotografiaLocal) }}" alt="Logo de {{ $partido->equipo_local->nombre }}" style="max-width: 100px; max-height: 100px;">
+                @else
+                    <p>No hay logo disponible</p>
+                @endif
+            </div>
+            
+            <div class="col-md-2 text-center">
+                <h4>VS</h4>
+            </div>
+            
+            <div class="col-md-5 text-center">
+                <h4>{{ $partido->equipo_visitante->nombre }}</h4>
+                @php
+                    $fotografiaVisitante = $partido->equipo_visitante->fotografia ?? null;
+                    $fotografiaVisitante = $fotografiaVisitante ? str_replace('\\', '/', $fotografiaVisitante) : null;
+                @endphp
+                @if($fotografiaVisitante)
+                    <img src="{{ asset('storage/' . $fotografiaVisitante) }}" alt="Logo de {{ $partido->equipo_visitante->nombre }}" style="max-width: 100px; max-height: 100px;">
+                @else
+                    <p>No hay logo disponible</p>
+                @endif
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="logo_equipo_local">Logo Equipo Local</label>
-            <input type="file" name="logo_equipo_local" id="logo_equipo_local" class="form-control">
-            @if($partido->logo_equipo_local)
-                <img src="{{ asset('storage/' . $partido->logo_equipo_local) }}" alt="Logo de {{ $partido->equipo_local }}" style="max-width: 100px; max-height: 50px;">
-            @endif
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="fecha_juego">Fecha del Juego</label>
+                    <input type="date" name="fecha_juego" id="fecha_juego" class="form-control" value="{{ \Carbon\Carbon::parse($partido->fecha_juego)->format('Y-m-d') }}" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="hora_juego">Hora del Juego</label>
+                    <input type="time" name="hora_juego" id="hora_juego" class="form-control" value="{{ \Carbon\Carbon::parse($partido->hora_juego)->format('H:i') }}" required>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="equipo_visitante">Equipo Visitante</label>
-            <input type="text" name="equipo_visitante" id="equipo_visitante" class="form-control" value="{{ $partido->equipo_visitante }}" required>
-        </div>
+        <input type="hidden" name="equipo_local_id" value="{{ $partido->equipo_local_id }}">
+        <input type="hidden" name="equipo_visitante_id" value="{{ $partido->equipo_visitante_id }}">
+        <input type="hidden" name="tiempo_seleccionado" value="{{ $partido->tiempo_seleccionado }}">
 
-        <div class="form-group">
-            <label for="logo_equipo_visitante">Logo Equipo Visitante</label>
-            <input type="file" name="logo_equipo_visitante" id="logo_equipo_visitante" class="form-control">
-            @if($partido->logo_equipo_visitante)
-                <img src="{{ asset('storage/' . $partido->logo_equipo_visitante) }}" alt="Logo de {{ $partido->equipo_visitante }}" style="max-width: 100px; max-height: 50px;">
-            @endif
-        </div>
-
-        <div class="form-group">
-            <label for="fecha_juego">Fecha del Juego</label>
-            <input type="date" name="fecha_juego" id="fecha_juego" class="form-control" value="{{ $partido->fecha_juego }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="hora_juego">Hora del Juego</label>
-            <input type="time" name="hora_juego" id="hora_juego" class="form-control" value="{{ $partido->hora_juego }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="estado">Estado</label>
-            <select name="estado" id="estado" class="form-control" required>
-                <option value="no_iniciado" {{ $partido->estado == 'no_iniciado' ? 'selected' : '' }}>No Iniciado</option>
-                <option value="primer_tiempo" {{ $partido->estado == 'primer_tiempo' ? 'selected' : '' }}>Primer Tiempo</option>
-                <option value="segundo_tiempo" {{ $partido->estado == 'segundo_tiempo' ? 'selected' : '' }}>Segundo Tiempo</option>
-                <option value="finalizado" {{ $partido->estado == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <button type="submit" class="btn btn-primary mt-3">Guardar Cambios</button>
     </form>
 @stop
 

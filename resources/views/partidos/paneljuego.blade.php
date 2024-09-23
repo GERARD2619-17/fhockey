@@ -234,7 +234,6 @@
             }
             
             let tiempoLimite = periodoActual === 'primer_tiempo' ? tiempoMitad : tiempoTotalJuego;
-            let tiempoExtraActual = periodoActual === 'primer_tiempo' ? tiempoExtraPrimerTiempo : tiempoExtraSegundoTiempo;
             
             if (!alertaMostrada && 
                 ((periodoActual === 'primer_tiempo' && segundos === tiempoMitad - 300) ||
@@ -242,15 +241,10 @@
                 mostrarAlertaFinTiempo();
             }
             
-            if (segundos === tiempoLimite + tiempoExtraActual) {
+            if (segundos === tiempoLimite + tiempoExtra) {
                 if (tiempoExtraAgregado > 0) {
-                    if (periodoActual === 'primer_tiempo') {
-                        tiempoExtraPrimerTiempo += tiempoExtraAgregado;
-                    } else {
-                        tiempoExtraSegundoTiempo += tiempoExtraAgregado;
-                    }
+                    tiempoExtra += tiempoExtraAgregado;
                     tiempoExtraAgregado = 0;
-                    actualizarTiempoExtraServidor();
                 } else {
                     manejarFinPeriodo();
                 }
