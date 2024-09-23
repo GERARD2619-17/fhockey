@@ -386,8 +386,31 @@
     }
 
     function reproducirSonidoAlerta() {
-        let audio = new Audio('/ruta/a/tu/sonido/alerta.mp3');
-        audio.play();
+        // Crear un contexto de audio
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Crear un oscilador
+        const oscillator = audioContext.createOscillator();
+        
+        // Crear un nodo de ganancia (volumen)
+        const gainNode = audioContext.createGain();
+
+        // Conectar el oscilador al nodo de ganancia y luego a la salida
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Configurar el oscilador
+        oscillator.type = 'sine'; // Tipo de onda sinusoidal
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Frecuencia en Hz (La4)
+
+        // Configurar la envolvente del sonido
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+        // Iniciar y detener el oscilador
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.5);
     }
 
     function pedirTiempoExtra() {
