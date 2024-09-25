@@ -33,7 +33,8 @@ return new class extends Migration
              $table->integer('tiempo_transcurrido')->default(0);
  
              // Estado del partido (con posibilidad de agregar otros estados si es necesario)
-             $table->enum('estado', ['no_iniciado', 'primer_tiempo', 'descanso', 'segundo_tiempo', 'finalizado'])
+             $table->enum('estado', ['no_iniciado', 'primer_tiempo', 'descanso', 'segundo_tiempo', 
+             'tercer_tiempo', 'cuarto_tiempo', 'tiempo_extra_1', 'tiempo_extra_2', 'penales', 'finalizado'])
                    ->default('no_iniciado');
  
              // Tarjetas y penales para equipo local
