@@ -83,7 +83,6 @@ class JugadoresController extends Controller
             'posicion' => 'required|string|max:255',
             'nacionalidad' => 'required|string|max:255',
             'fotografia' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'posicion' => 'required|string|max:255',
         ]);
 
         $jugador = Jugadores::findOrFail($id);
