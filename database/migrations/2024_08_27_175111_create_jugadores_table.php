@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use function Laravel\Prompts\table;
+
 return new class extends Migration
 {
     /**
@@ -17,6 +19,7 @@ return new class extends Migration
             $table->string('nombre'); // Nombre: string
             $table->integer('edad'); // Edad: int
             $table->string('posicion'); // Posicion: string
+            $table->string('equipo'); //equipo: string
             $table->string('nacionalidad'); // Nacionalidad: string
             $table->timestamps();
         });

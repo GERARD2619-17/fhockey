@@ -18,6 +18,7 @@
                 <th scope="col">Edad</th>
                 <th scope="col">Posición</th>
                 <th scope="col">Nacionalidad</th>
+                <th scope="col"> Equipo </th>
                 <th scope="col" class="actions-column">Acciones</th>
             </tr>
         </thead>

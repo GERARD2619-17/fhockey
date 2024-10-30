@@ -235,9 +235,8 @@
             
             let tiempoLimite = periodoActual === 'primer_tiempo' ? tiempoMitad : tiempoTotalJuego;
             
-            if (!alertaMostrada && 
-                ((periodoActual === 'primer_tiempo' && segundos === tiempoMitad - 300) ||
-                 (periodoActual === 'segundo_tiempo' && segundos === tiempoTotalJuego - 300))) {
+            if (!alertaMostrada && ((periodoActual === 'primer_tiempo' && segundos === tiempoMitad - 40) || 
+                 (periodoActual === 'segundo_tiempo' && segundos === tiempoTotalJuego - 40))) {
                 mostrarAlertaFinTiempo();
             }
             
