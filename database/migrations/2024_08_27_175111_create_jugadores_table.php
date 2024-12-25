@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nombre'); // Nombre: string
             $table->integer('edad'); // Edad: int
             $table->string('posicion'); // Posicion: string
-            $table->string('nacionalidad'); // Nacionalidad: stringg
+            $table->string('nacionalidad'); // Nacionalidad: striing
             $table->timestamps();
         });
     }
