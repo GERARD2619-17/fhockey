@@ -20,7 +20,11 @@ class equipos extends Model
         'nombre',
         'fotografia',
     ];
-
+    // Agregada la relación con jugadores
+     public function jugadores()
+     {
+        return $this->hasMany(jugadores::class);
+     }
     /**
      * Get the partidos donde el equipo es local.
      */

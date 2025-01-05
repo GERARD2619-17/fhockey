@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\equipos;
 use App\Models\Jugadores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +23,9 @@ class JugadoresController extends Controller
      */
     public function create()
     {
-        return view('jugadores.create');
+        //return view('jugadores.create');
+        $equipos = equipos::all();
+        return view('jugadores.create', compact('equipos'));
     }
 
     /**
@@ -30,19 +33,24 @@ class JugadoresController extends Controller
      */
     public function store(Request $request)
     {
+        //arreglar esta seccion por que da error
         $request->validate([
+            'fotografia' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'nombre' => 'required|string|max:255',
-            'edad' => 'required|integer',
+            'fecha_nacimiento' => 'required|date',
+            'edad' => 'required|numeric',
             'posicion' => 'required|string|max:255',
             'nacionalidad' => 'required|string|max:255',
-            'fotografia' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'equipo_id' => 'required|exists:equipos,id'
         ]);
 
         $jugador = new Jugadores();
         $jugador->nombre = $request->input('nombre');
+        $jugador->fecha_nacimiento = $request->input('fecha_nacimiento');
         $jugador->edad = $request->input('edad');
         $jugador->posicion = $request->input('posicion');
         $jugador->nacionalidad = $request->input('nacionalidad');
+        $jugador->equipo_id = $request->input('equipo_id');
 
         if ($request->hasFile('fotografia')) {
             $path = $request->file('fotografia')->store('public/uploads/players');

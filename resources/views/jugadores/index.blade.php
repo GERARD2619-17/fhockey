@@ -36,6 +36,7 @@
                     <td>{{ $jugador->edad }}</td>
                     <td>{{ $jugador->posicion }}</td>
                     <td>{{ $jugador->nacionalidad }}</td>
+                    <td>{{ $jugador->equipo ? $jugador->equipo->nombre : 'Sin equipo' }}</td>
                     <td class="actions-column">
                         <a href="{{ route('jugadores.show', $jugador->id) }}" class="btn btn-info btn-sm">Ver</a>
                         <a href="{{ route('jugadores.edit', $jugador->id) }}" class="btn btn-warning btn-sm">Editar</a>

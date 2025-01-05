@@ -15,9 +15,13 @@ return new class extends Migration
             $table->id();// ID: int
             $table->string('fotografia'); // Fotografia: string
             $table->string('nombre'); // Nombre: string
+            $table->date('fecha_nacimiento'); // fechanac: date
             $table->integer('edad'); // Edad: int
             $table->string('posicion'); // Posicion: string
             $table->string('nacionalidad'); // Nacionalidad: striing
+            // Agregar la relación con equipo
+            $table->unsignedBigInteger('equipo_id');
+            $table->foreign('equipo_id')->references('id')->on('equipos')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -64,7 +64,9 @@ class EquiposController extends Controller
     public function show(equipos $equipo)
     {
         // Mostrar la vista del equipo especificado
-        return view('equipos.show', compact('equipo'));
+        //return view('equipos.show', compact('equipo'));
+        $jugadores = $equipo->jugadores; // Obtiene los jugadores relacionados
+        return view('equipos.show', compact('equipo', 'jugadores'));
     }
 
     /**

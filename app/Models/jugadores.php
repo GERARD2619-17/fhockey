@@ -14,8 +14,16 @@ class jugadores extends Model
     protected $fillable = [
         'fotografia',
         'nombre',
+        'fecha_nacimiento',
         'edad',
         'posicion',
-        'nacionalidad'
+        'nacionalidad',
+        'equipo_id'
     ];//falta corregir mas el codigo estamos con el controlador jugador y luego veremos las vistas
+
+     //Relación con Equipo
+     public function equipo()
+     {
+         return $this->belongsTo(equipos::class, 'equipo_id');
+     }
 }
