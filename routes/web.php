@@ -28,6 +28,7 @@ Route::middleware([
 
     // Rutas de equipos (CRUD)
     Route::resource('equipos', EquiposController::class);
+    
 
    // Rutas para Partidos (CRUD)
    Route::get('partidos/create', [PartidosController::class, 'create'])->name('partidos.create');

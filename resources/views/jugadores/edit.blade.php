@@ -3,71 +3,75 @@
 @section('title', 'Editar Jugador')
 
 @section('content_header')
-    <h1>Editar Jugador</h1>
+<h1>Editar Jugador: {{ $jugador->nombre }}</h1>
 @stop
 
 @section('content')
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3>{{ $jugador->nombre }}</h3>
+    </div>
+    <div class="card-body">
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-                <form action="{{ route('jugadores.update', $jugador->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input id="nombre" name="nombre" type="text" class="form-control" value="{{ old('nombre', $jugador->nombre) }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="edad" class="form-label">Edad</label>
-                        <input id="edad" name="edad" type="number" class="form-control" value="{{ old('edad', $jugador->edad) }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="posicion" class="form-label">Posición</label>
-                        <input id="posicion" name="posicion" type="text" class="form-control" value="{{ old('posicion', $jugador->posicion) }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nacionalidad" class="form-label">Nacionalidad</label>
-                        <input id="nacionalidad" name="nacionalidad" type="text" class="form-control" value="{{ old('nacionalidad', $jugador->nacionalidad) }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="fotografia" class="form-label">Fotografía</label>
-                        @if($jugador->fotografia)
-                            <div>
-                                <img src="{{ asset('storage/' . $jugador->fotografia) }}" alt="{{ $jugador->nombre }}" class="img-fluid" style="max-width: 100%;">
-                                <p><small>Actual</small></p>
-                            </div>
-                        @else
-                            <p>No disponible</p>
-                        @endif
+        <form action="{{ route('jugadores.update', $jugador->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            
+            <div class="row">
+                <div class="col-md-4">
+                    @if($jugador->fotografia)
+                        <img src="{{ asset('storage/' . $jugador->fotografia) }}" alt="Foto de {{ $jugador->nombre }}" class="img-fluid rounded mb-3">
+                    @else
+                        <img src="https://via.placeholder.com/150" alt="No disponible" class="img-fluid rounded mb-3">
+                    @endif
+                    <div class="form-group">
+                        <label for="fotografia">Actualizar fotografía</label>
                         <input id="fotografia" name="fotografia" type="file" class="form-control-file">
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <a href="{{ route('jugadores.index') }}" class="btn btn-secondary">Cancelar</a>
-                </form>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label><strong>Nombre:</strong></label>
+                        <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $jugador->nombre) }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><strong>Edad:</strong></label>
+                        <input type="number" name="edad" class="form-control" value="{{ old('edad', $jugador->edad) }}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><strong>Posición:</strong></label>
+                        <input type="text" name="posicion" class="form-control" value="{{ old('posicion', $jugador->posicion) }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><strong>Nacionalidad:</strong></label>
+                        <input type="text" name="nacionalidad" class="form-control" value="{{ old('nacionalidad', $jugador->nacionalidad) }}">
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a href="{{ route('jugadores.index') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
 @stop
 
 @section('css')
     {{-- Agregar aquí estilos adicionales --}}
-    {{-- <link rel="stylesheet" href="/css/admin_custom.css"> --}}
+    <link rel="stylesheet" href="/css/admin_custom.css">
 @stop
 
 @section('js')

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\equipos;
 use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
 class EquiposController extends Controller
@@ -15,8 +15,9 @@ class EquiposController extends Controller
     public function index()
     {
          // Obtener todos los equipos
-         $equipos = Equipos::all();
+         $equipos = equipos::all();
          return view('equipos.index', compact('equipos'));
+
     }
 
     /**

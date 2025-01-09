@@ -327,7 +327,7 @@ return [
             'text' => 'Equipos',
             'url' => 'equipos',
             'icon' => 'fas fa-fw fa-users-cog',
-            //'label' => 4, solo esta de rreleno 
+            'label' => null,  
             'label_color' => 'success',
         ],
         [

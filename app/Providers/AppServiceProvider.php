@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\equipos;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +21,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        $menu = config('adminlte.menu');
+    foreach ($menu as $key => $item) {
+        if (isset($item['text']) && $item['text'] === 'Equipos') {
+            $menu[$key]['label'] = equipos::count();
+            break;
+        }
+    }
+    config(['adminlte.menu' => $menu]);
     }
 }
